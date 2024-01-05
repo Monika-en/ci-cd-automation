@@ -16,7 +16,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 // Clone the GitHub repository specified as a parameter
-                checkout([$class: 'GitSCM', branches: [[name: '*/master']], userRemoteConfigs: [[url: params.PROJECT_REPO, credentialsId: 'monika-en']]])
+                checkout([$class: 'GitSCM', branches: [[name: '*/main']], userRemoteConfigs: [[url: params.PROJECT_REPO, credentialsId: 'monika-en']]])
             }
         }
 
