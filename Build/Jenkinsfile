@@ -1,0 +1,49 @@
+pipeline {
+    parameters {
+        string(name: 'PROJECT_REPO', description: 'GitHub repository URL (e.g., https://github.com/your-username/your-repo)')
+    }
+
+    agent { label 'ec2-linux' }
+
+    environment {
+        DOCKER_HUB_CREDENTIALS = 'docker-hub-credentials-id'
+        // DOCKER_IMAGE_NAME = 'your-dockerhub-username/your-image-name'
+		DOCKER_IMAGE_NAME = 'test'
+        CUSTOM_IMAGE_TAG = "${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER}"
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                // Clone the GitHub repository specified as a parameter
+                checkout([$class: 'GitSCM', branches: [[name: '*/master']], userRemoteConfigs: [[url: params.PROJECT_REPO]]])
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    // Build the Docker image from the Dockerfile
+                    docker.build(CUSTOM_IMAGE_TAG, "-f Dockerfile .")
+					/*
+                    // Log in to Docker Hub
+                    docker.withRegistry('https://registry.hub.docker.com', DOCKER_HUB_CREDENTIALS) {
+                        // Push the image to Docker Hub
+                        docker.image(CUSTOM_IMAGE_TAG).push()
+                    }
+					*/
+                }
+            }
+        }
+		/*
+        stage('Cleanup') {
+            steps {
+                // Remove the local Docker image (optional)
+                script {
+                    docker.image(CUSTOM_IMAGE_TAG).remove()
+                }
+            }
+        }
+		*/
+    }
+}
