@@ -1,13 +1,15 @@
 pipeline {
     parameters {
         string(name: 'PROJECT_REPO', description: 'GitHub repository URL (e.g., https://github.com/your-username/your-repo)')
+		string(name: 'REPO_BRANCH', defaultValue: 'main', description: 'Repository branch (e.g., main)')
+		
     }
 
     agent { label 'ec2-linux' }
 
     environment {
-        DOCKER_HUB_CREDENTIALS = 'docker-hub-credentials-id'
-        // DOCKER_IMAGE_NAME = 'your-dockerhub-username/your-image-name'
+        DOCKER_HUB_CREDENTIALS = 'docker-hub-credentials'
+        // DOCKER_IMAGE_NAME = 'mencheva/${env.JOB_BASE_NAME}'
 		DOCKER_IMAGE_NAME = 'test'
         CUSTOM_IMAGE_TAG = "${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER}"
     }
@@ -16,7 +18,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 // Clone the GitHub repository specified as a parameter
-                checkout([$class: 'GitSCM', branches: [[name: '*/main']], userRemoteConfigs: [[url: params.PROJECT_REPO, credentialsId: 'monika-en']]])
+                checkout([$class: 'GitSCM', branches: [[name: "*/${params.REPO_BRANCH}"]], userRemoteConfigs: [[url: params.PROJECT_REPO, credentialsId: 'monika-en']]])
             }
         }
 
@@ -24,14 +26,12 @@ pipeline {
             steps {
                 script {
                     // Build the Docker image from the Dockerfile
-                    docker.build(CUSTOM_IMAGE_TAG, "-f Dockerfile .")
-					/*
+                    docker.build(CUSTOM_IMAGE_TAG, "-f Dockerfile .")		
                     // Log in to Docker Hub
                     docker.withRegistry('https://registry.hub.docker.com', DOCKER_HUB_CREDENTIALS) {
                         // Push the image to Docker Hub
                         docker.image(CUSTOM_IMAGE_TAG).push()
                     }
-					*/
                 }
             }
         }
