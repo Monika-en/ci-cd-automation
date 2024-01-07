@@ -19,13 +19,14 @@ pipeline {
             steps {
                 script {
 					sh 'cppcheck --enable=all --inconclusive --xml --xml-version=2 . 2> cppcheck.xml'
+					sh 'mkdir src && cppcheck-htmlreport --source-dir=. --title=${env.JOB_BASE_NAME} --file=cppcheck.xml --report-dir=report'
                 }
             }
         }
     }
 	post {
         always {
-            archiveArtifacts artifacts: 'cppcheck.xml'
+            archiveArtifacts artifacts: 'report/*.*'
         }
     }
 }
