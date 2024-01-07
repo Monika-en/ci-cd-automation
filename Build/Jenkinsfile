@@ -4,28 +4,6 @@ pipeline {
 		string(name: 'REPO_BRANCH', defaultValue: 'main', description: 'Repository branch (e.g., main)')
 		
     }
-	
-	options {
-		office365ConnectorWebhooks {
-			webhooks {	
-				webhook {
-					name('Example Webhook Name')
-					withCredentials([string(credentialsId: 'Office_365_Connector_URL', variable: 'o365url')]){
-					url(${o365url})
-					}
-					startNotification(false)
-					notifySuccess(true)
-					notifyAborted(false)
-					notifyNotBuilt(false)
-					notifyUnstable(false)
-					notifyFailure(true)
-					notifyBackToNormal(false)
-					notifyRepeatedFailure(false)
-					timeout(30000)
-				}
-			}
-		}
-    }
 
     agent { label 'ec2-linux' }
 
@@ -81,4 +59,31 @@ pipeline {
             }
         }
     }
+	
+	post { 
+		success {  
+			script {
+				withCredentials([string(credentialsId: 'Office_365_Connector_URL', variable: 'o365url')]){
+					office365ConnectorSend (
+						status: "Pipeline Status",
+						webhookUrl: "${o365url}",
+						color: 'green',
+						message: "Build Successful: ${JOB_NAME} - ${BUILD_DISPLAY_NAME}<br>Pipeline duration: ${currentBuild.durationString}"
+					)
+				}
+			}
+		}  
+		failure {  
+			script {
+				withCredentials([string(credentialsId: 'Office_365_Connector_URL', variable: 'o365url')]){
+					office365ConnectorSend (
+						status: "Pipeline Status",
+						webhookUrl: "${o365url}",
+						color: 'red',
+						message: "Build Failed: ${JOB_NAME} - ${BUILD_DISPLAY_NAME}<br>Pipeline duration: ${currentBuild.durationString}"
+					)
+				}
+			}  
+		} 
+	}  
 }

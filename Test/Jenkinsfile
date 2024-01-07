@@ -5,25 +5,11 @@ pipeline {
 		
     }
 	options {
-		office365ConnectorWebhooks {
-			webhooks {	
-				webhook {
-					name('Example Webhook Name')
-					withCredentials([string(credentialsId: 'Office_365_Connector_URL', variable: 'o365url')]){
-					url(${o365url})
-					}
-					startNotification(false)
-					notifySuccess(true)
-					notifyAborted(false)
-					notifyNotBuilt(false)
-					notifyUnstable(false)
-					notifyFailure(true)
-					notifyBackToNormal(false)
-					notifyRepeatedFailure(false)
-					timeout(30000)
-				}
-			}
-		}
+		withCredentials([string(credentialsId: 'Office_365_Connector_URL', variable: 'o365url')]){
+		office365ConnectorWebhooks([
+            [name: "Office 365", url: "${o365url}", notifyBackToNormal: true, notifyFailure: true, notifyRepeatedFailure: true, notifySuccess: true, notifyAborted: true]
+        ])
+	}
     }
 
     agent { label 'ec2-linux' }
