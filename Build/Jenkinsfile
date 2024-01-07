@@ -28,14 +28,25 @@ pipeline {
                     CUSTOM_IMAGE_TAG = temp
                     // Build the Docker image from the Dockerfile
                     docker.build(CUSTOM_IMAGE_TAG, "-f Dockerfile .")		
-                    // Log in to Docker Hub
-                    docker.withRegistry('https://registry.hub.docker.com', DOCKER_HUB_CREDENTIALS) {
-                        // Push the image to Docker Hub
-                        docker.image(CUSTOM_IMAGE_TAG).push()
-                    }
                 }
             }
         }
+		
+		stage('Push Docker Image') {
+			when {
+				anyOf {
+				 expression { params.REPO_BRANCH == 'main' }
+				}
+			}
+			steps {
+				// Log in to Docker Hub
+				docker.withRegistry('https://registry.hub.docker.com', DOCKER_HUB_CREDENTIALS) {
+					// Push the image to Docker Hub
+					docker.image(CUSTOM_IMAGE_TAG).push()
+				}
+			}
+		}
+		
 		/*
         stage('Cleanup') {
             steps {
