@@ -19,7 +19,9 @@ pipeline {
             steps {
                 script {
 					sh 'cppcheck --enable=all --inconclusive --xml --xml-version=2 . 2> cppcheck.xml'
-					sh 'mkdir report && cppcheck-htmlreport --source-dir=. --title=${env.JOB_BASE_NAME} --file=cppcheck.xml --report-dir=report'
+					sh 'rm -rf report'
+					sh 'mkdir -p report'
+					sh """cppcheck-htmlreport --source-dir=. --title=${env.JOB_BASE_NAME} --file=cppcheck.xml --report-dir=report"""
                 }
             }
         }
