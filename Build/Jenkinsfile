@@ -9,7 +9,7 @@ pipeline {
 
     environment {
         DOCKER_HUB_CREDENTIALS = 'docker-hub-credentials'
-        DOCKER_IMAGE_NAME = 'mencheva/${env.JOB_BASE_NAME}'
+        DOCKER_IMAGE_NAME = "mencheva/${env.JOB_BASE_NAME}"
         CUSTOM_IMAGE_TAG = "${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER}"
     }
 
@@ -24,6 +24,9 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
+					def temp = CUSTOM_IMAGE_TAG.toLowerCase();
+					temp = "${temp//_/-}"
+                    CUSTOM_IMAGE_TAG = temp
                     // Build the Docker image from the Dockerfile
                     docker.build(CUSTOM_IMAGE_TAG, "-f Dockerfile .")		
                     // Log in to Docker Hub
