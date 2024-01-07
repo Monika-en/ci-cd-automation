@@ -61,29 +61,14 @@ pipeline {
     }
 	
 	post { 
-		success {  
+		always {  
 			script {
 				withCredentials([string(credentialsId: 'Office_365_Connector_URL', variable: 'o365url')]){
 					office365ConnectorSend (
-						status: "Pipeline Status",
-						webhookUrl: "${o365url}",
-						color: 'green',
-						message: "Build Successful: ${JOB_NAME} - ${BUILD_DISPLAY_NAME}<br>Pipeline duration: ${currentBuild.durationString}"
+						webhookUrl: "${o365url}"
 					)
 				}
 			}
-		}  
-		failure {  
-			script {
-				withCredentials([string(credentialsId: 'Office_365_Connector_URL', variable: 'o365url')]){
-					office365ConnectorSend (
-						status: "Pipeline Status",
-						webhookUrl: "${o365url}",
-						color: 'red',
-						message: "Build Failed: ${JOB_NAME} - ${BUILD_DISPLAY_NAME}<br>Pipeline duration: ${currentBuild.durationString}"
-					)
-				}
-			}  
-		} 
+		}
 	}  
 }
