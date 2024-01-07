@@ -7,21 +7,21 @@ pipeline {
 	
 	options {
 		office365ConnectorWebhooks {
-			webhooks {
-				withCredentials([string(credentialsId: 'Office_365_Connector_URL', variable: 'o365url')]){
-					webhook {
-						name('Example Webhook Name')
-						url(${o365url})
-						startNotification(false)
-						notifySuccess(true)
-						notifyAborted(false)
-						notifyNotBuilt(false)
-						notifyUnstable(false)
-						notifyFailure(true)
-						notifyBackToNormal(false)
-						notifyRepeatedFailure(false)
-						timeout(30000)
+			webhooks {	
+				webhook {
+					name('Example Webhook Name')
+					withCredentials([string(credentialsId: 'Office_365_Connector_URL', variable: 'o365url')]){
+					url(${o365url})
 					}
+					startNotification(false)
+					notifySuccess(true)
+					notifyAborted(false)
+					notifyNotBuilt(false)
+					notifyUnstable(false)
+					notifyFailure(true)
+					notifyBackToNormal(false)
+					notifyRepeatedFailure(false)
+					timeout(30000)
 				}
 			}
 		}
