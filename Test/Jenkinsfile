@@ -1,0 +1,26 @@
+pipeline {
+    parameters {
+        string(name: 'PROJECT_REPO', description: 'GitHub repository URL (e.g., https://github.com/your-username/your-repo)')
+		string(name: 'REPO_BRANCH', defaultValue: 'main', description: 'Repository branch (e.g., main)')
+		
+    }
+
+    agent { label 'ec2-linux' }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                // Clone the GitHub repository specified as a parameter
+                checkout([$class: 'GitSCM', branches: [[name: "*/${params.REPO_BRANCH}"]], userRemoteConfigs: [[url: params.PROJECT_REPO, credentialsId: 'monika-en']]])
+            }
+        }
+
+        stage('Run cppcheck') {
+            steps {
+                script {
+					sh 'cppcheck --enable=all --inconclusive --xml --xml-version=2 . 2> cppcheck.xml'
+                }
+            }
+        }
+    }
+}
