@@ -24,12 +24,18 @@ pipeline {
 					sh """cppcheck-htmlreport --source-dir=. --title=${env.JOB_BASE_NAME} --file=cppcheck.xml --report-dir=report"""
                 }
             }
-        }
-    }
-	post {
-        always {
-			archiveArtifacts artifacts: 'cppcheck.xml'
-            archiveArtifacts artifacts: 'report/*.*'
+			post {
+				always {
+					archiveArtifacts artifacts: 'cppcheck.xml'
+					archiveArtifacts artifacts: 'report/*.*'
+				}
+			}
+        }	
+		
+		stage('Cleanup') {
+            steps {
+                sh 'rm -rf .'
+            }
         }
     }
 }

@@ -48,8 +48,7 @@ pipeline {
 				}
 			}
 		}
-		
-		/*
+
         stage('Cleanup') {
             steps {
                 // Remove the local Docker image (optional)
@@ -58,6 +57,5 @@ pipeline {
                 }
             }
         }
-		*/
     }
 }
