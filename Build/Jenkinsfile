@@ -39,10 +39,12 @@ pipeline {
 				}
 			}
 			steps {
-				// Log in to Docker Hub
-				docker.withRegistry('https://registry.hub.docker.com', DOCKER_HUB_CREDENTIALS) {
-					// Push the image to Docker Hub
-					docker.image(CUSTOM_IMAGE_TAG).push()
+				script {
+					// Log in to Docker Hub
+					docker.withRegistry('https://registry.hub.docker.com', DOCKER_HUB_CREDENTIALS) {
+						// Push the image to Docker Hub
+						docker.image(CUSTOM_IMAGE_TAG).push()
+					}
 				}
 			}
 		}
