@@ -53,7 +53,7 @@ pipeline {
             steps {
                 // Remove the local Docker image (optional)
                 script {
-                    docker.image(CUSTOM_IMAGE_TAG).remove()
+                    sh '''docker rmi $(docker images -a -q)'''
                 }
             }
         }
