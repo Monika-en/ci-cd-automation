@@ -5,7 +5,7 @@ pipeline {
 		
     }
 	
-	properties {
+	options {
 		withCredentials([string(credentialsId: 'Office_365_Connector_URL', variable: 'o365url')])
 		{
 			office365ConnectorWebhooks {
