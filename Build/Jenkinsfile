@@ -24,8 +24,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-					def temp = CUSTOM_IMAGE_TAG.toLowerCase();
-					temp = "${temp//_/-}"
+					def temp = CUSTOM_IMAGE_TAG.toLowerCase().replaceAll("_", "-");
                     CUSTOM_IMAGE_TAG = temp
                     // Build the Docker image from the Dockerfile
                     docker.build(CUSTOM_IMAGE_TAG, "-f Dockerfile .")		
