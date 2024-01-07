@@ -54,6 +54,7 @@ pipeline {
                 // Remove the local Docker image (optional)
                 script {
                     sh """docker rmi ${CUSTOM_IMAGE_TAG}"""
+					sh """docker rmi registry.hub.docker.com/${CUSTOM_IMAGE_TAG}"""
                 }
             }
         }
