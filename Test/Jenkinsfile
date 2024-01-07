@@ -28,6 +28,7 @@ pipeline {
     }
 	post {
         always {
+			archiveArtifacts artifacts: 'cppcheck.xml'
             archiveArtifacts artifacts: 'report/*.*'
         }
     }
