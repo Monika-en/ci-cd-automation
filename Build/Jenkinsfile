@@ -4,6 +4,29 @@ pipeline {
 		string(name: 'REPO_BRANCH', defaultValue: 'main', description: 'Repository branch (e.g., main)')
 		
     }
+	
+	properties {
+		withCredentials([string(credentialsId: 'Office_365_Connector_URL', variable: 'o365url')])
+		{
+			office365ConnectorWebhooks {
+				webhooks {
+					webhook {
+						name('Example Webhook Name')
+						url(${o365url})
+						startNotification(false)
+						notifySuccess(true)
+						notifyAborted(false)
+						notifyNotBuilt(false)
+						notifyUnstable(false)
+						notifyFailure(true)
+						notifyBackToNormal(false)
+						notifyRepeatedFailure(false)
+						timeout(30000)
+					}
+				}
+			}
+		}
+    }
 
     agent { label 'ec2-linux' }
 
@@ -59,14 +82,4 @@ pipeline {
             }
         }
     }
-	/*
-	post { 
-		success {  
-			mail bcc: '', body: "Project: ${env.JOB_NAME}<br>Build Number: ${env.BUILD_NUMBER} <br> Build URL: ${env.BUILD_URL}", cc: '', charset: 'UTF-8', from: '', mimeType: 'text/html', replyTo: '', subject: "BUILD SUCCESSFUL: ${env.JOB_NAME}", to: "jenkins@cw.com";  
-		}  
-		failure {  
-			mail bcc: '', body: "Project: ${env.JOB_NAME}<br>Build Number: ${env.BUILD_NUMBER} <br> Build URL: ${env.BUILD_URL}", cc: '', charset: 'UTF-8', from: '', mimeType: 'text/html', replyTo: '', subject: "BUILD FAILED: ${env.JOB_NAME}", to: "jenkins@cw.com";  
-		} 
-	}  
-	*/
 }

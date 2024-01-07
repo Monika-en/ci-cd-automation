@@ -4,6 +4,28 @@ pipeline {
 		string(name: 'REPO_BRANCH', defaultValue: 'main', description: 'Repository branch (e.g., main)')
 		
     }
+	properties {
+		withCredentials([string(credentialsId: 'Office_365_Connector_URL', variable: 'o365url')])
+		{
+			office365ConnectorWebhooks {
+				webhooks {
+					webhook {
+						name('Example Webhook Name')
+						url(${o365url})
+						startNotification(false)
+						notifySuccess(true)
+						notifyAborted(false)
+						notifyNotBuilt(false)
+						notifyUnstable(false)
+						notifyFailure(true)
+						notifyBackToNormal(false)
+						notifyRepeatedFailure(false)
+						timeout(30000)
+					}
+				}
+			}
+		}
+    }
 
     agent { label 'ec2-linux' }
 
