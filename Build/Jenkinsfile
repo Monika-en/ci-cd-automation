@@ -2,6 +2,7 @@ pipeline {
     parameters {
         string(name: 'PROJECT_REPO', description: 'GitHub repository URL (e.g., https://github.com/your-username/your-repo)')
 		string(name: 'REPO_BRANCH', defaultValue: 'main', description: 'Repository branch (e.g., main)')
+		booleanParam(name: 'RUN_TEST', defaultValue: true, description: 'Shall the job start Test build')
 		
     }
 
@@ -69,6 +70,24 @@ pipeline {
 		}
 		always {  
 			script {
+				if(params.RUN_TEST){
+					switch("${env.JOB_BASE_NAME}"){
+						case "Build_PID_Control":
+							build job: 'Test_PID_Control',
+							wait: false,
+							parameters:[
+								string(name: 'PROJECT_REPO', value: "${params.PROJECT_REPO}"),
+								string(name: 'REPO_BRANCH', value: "${params.REPO_BRANCH}")
+							]; break
+						case "Build_UKF":
+							build job: 'Test_UKF',
+							wait: false,
+							parameters:[
+								string(name: 'PROJECT_REPO', value: "${params.PROJECT_REPO}"),
+								string(name: 'REPO_BRANCH', value: "${params.REPO_BRANCH}")
+							]; break
+					}
+				}
 				buildName "${env.JOB_BASE_NAME}_${env.BUILD_NUMBER}"
 				withCredentials([string(credentialsId: 'Office_365_Connector_URL', variable: 'o365url')]){
 					office365ConnectorSend (
