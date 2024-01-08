@@ -4,13 +4,6 @@ pipeline {
 		string(name: 'REPO_BRANCH', defaultValue: 'main', description: 'Repository branch (e.g., main)')
 		
     }
-	options {
-		withCredentials([string(credentialsId: 'Office_365_Connector_URL', variable: 'o365url')]){
-		office365ConnectorWebhooks([
-            [name: "Office 365", url: "${o365url}", notifyBackToNormal: true, notifyFailure: true, notifyRepeatedFailure: true, notifySuccess: true, notifyAborted: true]
-        ])
-	}
-    }
 
     agent { label 'ec2-linux' }
 
@@ -31,17 +24,23 @@ pipeline {
 					sh """cppcheck-htmlreport --source-dir=. --title=${env.JOB_BASE_NAME} --file=cppcheck.xml --report-dir=report"""
                 }
             }
-			post {
-				always {
-					archiveArtifacts artifacts: 'cppcheck.xml'
-					archiveArtifacts artifacts: 'report/*.*'
-				}
-			}
-        }	
-		
-		stage('Cleanup') {
-            steps {
-                sh 'rm -rf .'
+        }
+    }
+	post {
+        failure{
+			buildDescription "FAILURE"
+		}
+		success{
+			buildDescription "SUCCESS"
+		}
+        always {
+			archiveArtifacts artifacts: 'cppcheck.xml'
+            archiveArtifacts artifacts: 'report/*.*'
+            buildName "${env.JOB_BASE_NAME}_${env.BUILD_NUMBER}"
+            withCredentials([string(credentialsId: 'Office_365_Connector_URL', variable: 'o365url')]){
+                office365ConnectorSend (
+                    webhookUrl: "${o365url}"
+                )
             }
         }
     }
