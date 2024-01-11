@@ -2,8 +2,7 @@ pipeline {
     parameters {
         string(name: 'PROJECT_REPO', description: 'GitHub repository URL (e.g., https://github.com/your-username/your-repo)')
 		string(name: 'REPO_BRANCH', defaultValue: 'main', description: 'Repository branch (e.g., main)')
-		booleanParam(name: 'RUN_TEST', defaultValue: true, description: 'Shall the job start Test build')
-		
+		booleanParam(name: 'RUN_TEST', defaultValue: true, description: 'Shall the job start Test build')	
     }
 
     agent { label 'ec2-linux' }
@@ -55,7 +54,7 @@ pipeline {
                 // Remove the local Docker image (optional)
                 script {
                     sh """docker rmi ${CUSTOM_IMAGE_TAG}"""
-					//sh """docker rmi registry.hub.docker.com/${CUSTOM_IMAGE_TAG}"""
+					sh """docker rmi registry.hub.docker.com/${CUSTOM_IMAGE_TAG}"""
                 }
             }
         }

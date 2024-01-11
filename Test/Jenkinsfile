@@ -2,7 +2,6 @@ pipeline {
     parameters {
         string(name: 'PROJECT_REPO', description: 'GitHub repository URL (e.g., https://github.com/your-username/your-repo)')
 		string(name: 'REPO_BRANCH', defaultValue: 'main', description: 'Repository branch (e.g., main)')
-		
     }
 
     agent { label 'ec2-linux' }
