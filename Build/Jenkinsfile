@@ -1,8 +1,8 @@
 pipeline {
     parameters {
         string(name: 'PROJECT_REPO', description: 'GitHub repository URL (e.g., https://github.com/your-username/your-repo)')
-		string(name: 'REPO_BRANCH', defaultValue: 'main', description: 'Repository branch (e.g., main)')
-		booleanParam(name: 'RUN_TEST', defaultValue: true, description: 'Shall the job start Test build')	
+            string(name: 'REPO_BRANCH', defaultValue: 'main', description: 'Repository branch (e.g., main)')
+            booleanParam(name: 'RUN_TEST', defaultValue: true, description: 'Shall the job start Test build')        
     }
 
     agent { label 'ec2-linux' }
@@ -24,76 +24,81 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-					def temp = CUSTOM_IMAGE_TAG.toLowerCase().replaceAll("_", "-");
+                    def temp = CUSTOM_IMAGE_TAG.toLowerCase().replaceAll("_", "-");
                     CUSTOM_IMAGE_TAG = temp
                     // Build the Docker image from the Dockerfile
-                    docker.build(CUSTOM_IMAGE_TAG, "-f Dockerfile .")		
+                    docker.build(CUSTOM_IMAGE_TAG, "-f Dockerfile .")                
                 }
             }
         }
-		
-		stage('Push Docker Image') {
-			when {
-				anyOf {
-				 expression { params.REPO_BRANCH == 'main' }
-				}
-			}
-			steps {
-				script {
-					// Log in to Docker Hub
-					docker.withRegistry('https://registry.hub.docker.com', DOCKER_HUB_CREDENTIALS) {
-						// Push the image to Docker Hub
-						docker.image(CUSTOM_IMAGE_TAG).push()
-					}
-				}
-			}
-		}
+                
+        stage('Push Docker Image') {
+            when {
+                anyOf {
+                    expression { params.REPO_BRANCH == 'main' }
+                }
+            }
+            steps {
+                script {
+                    // Log in to Docker Hub
+                    docker.withRegistry('https://registry.hub.docker.com', DOCKER_HUB_CREDENTIALS) {
+                        // Push the image to Docker Hub
+                        docker.image(CUSTOM_IMAGE_TAG).push()
+                    }
+                }
+            }
+        }
 
         stage('Cleanup') {
+            when {
+                anyOf {
+                    expression { params.REPO_BRANCH == 'main' }
+                }
+            }
             steps {
                 // Remove the local Docker image (optional)
                 script {
                     sh """docker rmi ${CUSTOM_IMAGE_TAG}"""
-					sh """docker rmi registry.hub.docker.com/${CUSTOM_IMAGE_TAG}"""
+                    sh """docker rmi registry.hub.docker.com/${CUSTOM_IMAGE_TAG}"""
                 }
             }
         }
     }
-	
-	post {
-		failure{
-			buildDescription "FAILURE"
-		}
-		success{
-			buildDescription "SUCCESS"
-		}
-		always {  
-			script {
-				if(params.RUN_TEST){
-					switch("${env.JOB_BASE_NAME}"){
-						case "Build_PID_Control":
-							build job: 'Test_PID_Control',
-							wait: false,
-							parameters:[
-								string(name: 'PROJECT_REPO', value: "${params.PROJECT_REPO}"),
-								string(name: 'REPO_BRANCH', value: "${params.REPO_BRANCH}")
-							]; break
-						case "Build_UKF":
-							build job: 'Test_UKF',
-							wait: false,
-							parameters:[
-								string(name: 'PROJECT_REPO', value: "${params.PROJECT_REPO}"),
-								string(name: 'REPO_BRANCH', value: "${params.REPO_BRANCH}")
-							]; break
-					}
-				}
-				buildName "${env.JOB_BASE_NAME}_${env.BUILD_NUMBER}"
-				withCredentials([string(credentialsId: 'Office_365_Connector_URL', variable: 'o365url')]){
-					office365ConnectorSend (
-						webhookUrl: "${o365url}"
-					)
-				}
-			}
-		}
-	}
+        
+    post {
+        failure{
+            buildDescription "FAILURE"
+        }
+        success{
+            buildDescription "SUCCESS"
+        }
+        always {  
+            script {
+                if(params.RUN_TEST){
+                    switch("${env.JOB_BASE_NAME}"){
+                        case "Build_PID_Control":
+                            build job: 'Test_PID_Control',
+                            wait: false,
+                            parameters:[
+                                string(name: 'PROJECT_REPO', value: "${params.PROJECT_REPO}"),
+                                string(name: 'REPO_BRANCH', value: "${params.REPO_BRANCH}")
+                            ]; break
+                        case "Build_UKF":
+                            build job: 'Test_UKF',
+                            wait: false,
+                            parameters:[
+                                string(name: 'PROJECT_REPO', value: "${params.PROJECT_REPO}"),
+                                string(name: 'REPO_BRANCH', value: "${params.REPO_BRANCH}")
+                            ]; break
+                    }
+                }
+                buildName "${env.JOB_BASE_NAME}_${env.BUILD_NUMBER}"
+                withCredentials([string(credentialsId: 'Office_365_Connector_URL', variable: 'o365url')]){
+                    office365ConnectorSend (
+                        webhookUrl: "${o365url}"
+                    )
+                }
+            }
+        }
+    }
 }
